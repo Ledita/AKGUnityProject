@@ -6,6 +6,7 @@ public class platformScript : MonoBehaviour {
 	GameObject player;
 	bool ins = false;
 	Vector3 prevPos;
+	bool collided = false;
 
 
 	// Use this for initialization
@@ -20,13 +21,20 @@ public class platformScript : MonoBehaviour {
 		if(ins){
 			player.GetComponent<playerControlScript>().enviromentalMovement = (transform.position - prevPos);
 		}
+		if(collided){
+			rigidbody.constraints = RigidbodyConstraints.None;
+			collided = false;
+		}
 	
 		prevPos = transform.position;		
 	}
 	
-	void OnCollisionEnter(Collision col){
-		if(col.gameObject.name != "Player")
+	void InCollision(){
+		if(col.gameObject.name != "Player"){
 			rigidbody.isKinematic = true;
+			rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+			collided = true;
+		}
 	}
 
 	void OnTriggerEnter(Collider obj){
@@ -36,6 +44,7 @@ Debug.Log("Platform IN");
 	
 	void OnTriggerExit(Collider obj){
 		if(obj.gameObject.name == "Player") ins = false;
+		else if (obj.gameObject.name != gameObject.name) 
 Debug.Log("Platform OUT");
 	}
 	
