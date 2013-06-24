@@ -72,9 +72,9 @@ public class terminalScript : MonoBehaviour {
 			lines[activeLine].guiText.text = lineText[activeLine] + "_";
 			
 			if((plusLine || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.DownArrow)) && activeLine != 7){
-			/*	while(lineText[activeLine][0] == ' '){
+				while(lineText[activeLine][0] == ' '){
 					lineText[activeLine] = lineText[activeLine].Remove(0, 1);
-				}*/
+				}
 				errors[activeLine] = Process(lineText[activeLine]);
 Debug.Log(activeLine);
 				activeLine++;
