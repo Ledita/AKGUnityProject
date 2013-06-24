@@ -1,27 +1,28 @@
 using UnityEngine;
 using System.Collections;
 
-public class playerControlScript : MonoBehaviour {
-		
-	float movementSpeedBasic = 3.0f;
+public class playerControlScript : MonoBehaviour
+{	
+	float movementSpeedDefault = 3.6f;
 	float movementSpeed;
+	float crouchSpeedMultiplier = 0.16f;
+	float sprintMaxSpeed = 6f;
+	float sprintAcceleration = 12f;
+	float sprintDeceleration = -16f;
 	float verticalVelocity;
-	float duringJumpSpeed;
-	float duringJumpForwardSpeed;
-	float duringJumpHorizontalSpeed;
-	float jumpSpeedBasic = 2.5f;
+	float jumpSpeedDefault = 2.5f;
 	float jumpSpeed;
 	float verticalRotation = 0;
 	float mouseUpDownRange = 85.0f;
 	public float mouseSpeed = 3f;
 	public float joystickSpeed = 3f;
-	float staminaBasic = 4.5f;
-	public float stamina = 4.5f;
+	float staminaDefault = 14.5f;
+	public float stamina = 14.5f;
 	float forwardSpeed;
 	float horizontalSpeed;
 	float horizontalMovementSpeed = 2f;
 	
-	Vector3 playerSizeBasic = new Vector3 (1.0f, 0.9f, 1.0f);
+	Vector3 playerSizeDefault = new Vector3 (1.0f, 0.9f, 1.0f);
 	Vector3 playerSize;
 	float crouchPlayerSize = 0.6f;
 	
@@ -36,28 +37,33 @@ public class playerControlScript : MonoBehaviour {
 	
 	
 	// Use this for initialization
-	void Start () {
-		playerSize = playerSizeBasic;
+	void Start ()
+	{
+		playerSize = playerSizeDefault;
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+	{
 		CharacterController cc = GetComponent<CharacterController>();
 		
-		if(canMove){
+		if (canMove)
+		{
 			//Crouch
-			if(Input.GetButton("Crouch"))
+			if (Input.GetButton("Crouch"))
 			{
-				if(playerSize.y >= crouchPlayerSize) playerSize.y = playerSize.y - 0.02f; 		// ha le kell gugolni és még nem gugolt le akkor legugol
-				movementSpeed = movementSpeedBasic / 3.0f;
-				horizontalMovementSpeed = 1f;					// gugolás közbeni mozgás lassítása
-				playerSize.y = Mathf.Clamp(playerSize.y, crouchPlayerSize, playerSizeBasic.y);
+				// Ha le kell guggolni és még nem guggolt le akkor leguggol: lassan csökkenti a méretét
+				if (playerSize.y >= crouchPlayerSize) playerSize.y -= 0.03f;
+				movementSpeed = movementSpeedDefault * crouchSpeedMultiplier;//* crouchSpeedMultiplier;
+				horizontalMovementSpeed = 1f;					// guggolás közbeni mozgás lassítása
+				playerSize.y = Mathf.Clamp(playerSize.y, crouchPlayerSize, playerSizeDefault.y);
 				transform.localScale = playerSize;
 				rigidbody.AddForce(0, 0.01f, 0);				//kicsit lök felfelé, hogy ne essen át a padlón (bug fix)
 			}
-			else if (playerSize.y < playerSizeBasic.y && canStandUp){							// ha fel kell állni, és fel tud; a canStandUp-hoz egy külső (objektumok alatti) hitbox scriptje fér hozzá
-				playerSize.y += 0.02f;
-				playerSize.y = Mathf.Clamp(playerSize.y, crouchPlayerSize, playerSizeBasic.y);
+			else if (playerSize.y < playerSizeDefault.y && canStandUp)							// ha fel kell állni, és fel tud; a canStandUp-hoz egy külső (objektumok alatti) hitbox scriptje fér hozzá
+			{
+				playerSize.y += 0.03f;
+				playerSize.y = Mathf.Clamp(playerSize.y, crouchPlayerSize, playerSizeDefault.y);
 				horizontalMovementSpeed = 2f;					// minden tulajdonság visszaállítása
 				transform.localScale = playerSize;
 			}
@@ -67,24 +73,26 @@ public class playerControlScript : MonoBehaviour {
 			//sprint
 				if(Input.GetButton("Sprint") && stamina > 0 && (Input.GetAxis("Vertical") > 0 || Input.GetAxis("Joystick Vertical") > 0) && cc.isGrounded && !Input.GetButton("Crouch") && canStandUp) // ha minden meg van ahhoz, hogy sprinteljen
 				{
-					if(movementSpeed < movementSpeedBasic + 3.0f) movementSpeed += 4.1f * Time.deltaTime;
+					if (movementSpeed < sprintMaxSpeed) movementSpeed += sprintAcceleration * Time.deltaTime;
+					if (movementSpeed > sprintMaxSpeed) movementSpeed = sprintMaxSpeed;
 					stamina -= Time.deltaTime;					// begyorsítja, és veszít a staminából
 					if(stamina < 0)
 					{
-						movementSpeed = movementSpeedBasic;		// ha kifárad lelassítja (bug fix)
+						movementSpeed = movementSpeedDefault;		// ha kifárad lelassítja (bug fix)
 						if(Input.GetButtonUp("Sprint")) stamina -= 5.0f;
 					}
 				}
 				else if(cc.isGrounded)										// ha nem sprintel visszaállítja normális sebességre és visszatölti a staminát
 				{
 					stamina += Time.deltaTime;
-					if(movementSpeed > movementSpeedBasic) movementSpeed -= 3.5f * Time.deltaTime;
-					if(!Input.GetButton("Crouch") && canStandUp) movementSpeed = Mathf.Clamp(movementSpeed, movementSpeedBasic, movementSpeedBasic + 3.0f);
-					else if (!canStandUp) movementSpeed = movementSpeedBasic / 3.0f;
-					else movementSpeed = Mathf.Clamp(movementSpeed, movementSpeedBasic - 2.0f, movementSpeedBasic + 3.0f);
+					if (movementSpeed > movementSpeedDefault) movementSpeed += sprintDeceleration * Time.deltaTime;
+					if (movementSpeed < movementSpeedDefault && (!Input.GetButton("Crouch") || !canStandUp)) movementSpeed = movementSpeedDefault;
+					if(!Input.GetButton("Crouch") && canStandUp) movementSpeed = Mathf.Clamp(movementSpeed, movementSpeedDefault, movementSpeedDefault + 3.0f);
+					else if (!canStandUp) movementSpeed = movementSpeedDefault / 3.0f;
+					else movementSpeed = Mathf.Clamp(movementSpeed, movementSpeedDefault - 2.0f, movementSpeedDefault + 3.0f);
 				}
-			stamina = Mathf.Clamp(stamina, -5, staminaBasic);
-//Debug.Log(movementSpeed + " " + stamina);
+			stamina = Mathf.Clamp(stamina, -5, staminaDefault);
+Debug.Log("Speed: " + movementSpeed + " Stamina: " + stamina);
 			
 			//jump
 			if(cc.isGrounded)
@@ -93,7 +101,7 @@ public class playerControlScript : MonoBehaviour {
 			verticalVelocity += Physics.gravity.y * Time.deltaTime; //gravitáció
 //Debug.Log (verticalVelocity);
 			
-			jumpSpeed = jumpSpeedBasic + movementSpeed * (movementSpeed - 1.2f * Mathf.Sqrt(movementSpeed)) / 16; // ugrás sebessége (magassága), a játékos sebességéből levezetve (bonyolult, de így reális)
+			jumpSpeed = jumpSpeedDefault + movementSpeed * (movementSpeed - 1.2f * Mathf.Sqrt(movementSpeed)) / 16; // ugrás sebessége (magassága), a játékos sebességéből levezetve (bonyolult, de így reális)
 			
 	
 			
@@ -103,26 +111,19 @@ public class playerControlScript : MonoBehaviour {
 				stamina -= 0.3f;
 			}
 			
-			duringJumpForwardSpeed = forwardSpeed;
-			duringJumpHorizontalSpeed = horizontalSpeed;	// ugrás közbeni mozgás sebessége elmentése
-			duringJumpSpeed = movementSpeed;
-			
 			if(!cc.isGrounded){						// ha a levegőben van
-				movementSpeed = duringJumpSpeed;
-				forwardSpeed = duringJumpForwardSpeed;	// ugárs közbeni sebesség alkalmazása
-				horizontalSpeed = duringJumpHorizontalSpeed;
 				if(!crouchJumped && Input.GetButtonDown("Crouch")){ // ugrás-gugolás
-					verticalVelocity += 2.0f;	// gugolással lök egyet (bug fix)
+					verticalVelocity += 2.0f;	// guggolással lök egyet (bug fix)
 					crouchJumped = true;		// csak egyszer lehet ugrani
 				}
 			}
-			else if(cc.isGrounded){
+			else {
 				crouchJumped = false;			// ugrás-gugolás számláló nullázása
 			}
 	
 			
 			
-			//camera rotate
+			//rotate camera
 			if(mouseOn && !joystick){						// ha mozoghat a kamera, és nem a joystick mozog
 				float mouseX = Input.GetAxis("Mouse X") * mouseSpeed;			// x irányba forgatja a játékost
 				transform.Rotate(0, mouseX, 0);
@@ -131,7 +132,8 @@ public class playerControlScript : MonoBehaviour {
 				verticalRotation = Mathf.Clamp(verticalRotation, -mouseUpDownRange, mouseUpDownRange);
 				Camera.main.transform.localRotation = Quaternion.Euler(verticalRotation, 0, 0);
 			}
-			else if(mouseOn && joystick){					// ha a joystick mozog
+			else if(mouseOn && joystick)					// ha a joystick mozog
+			{
 				float mouseX;
 				mouseX = Input.GetAxis("Joystick X") * joystickSpeed;
 				transform.Rotate(0, mouseX, 0);
@@ -142,8 +144,10 @@ public class playerControlScript : MonoBehaviour {
 				Camera.main.transform.localRotation = Quaternion.Euler(verticalRotation, 0, 0);
 			}
 			
-
-			if(GetComponent<pauseMenuScript>().paused){ // egér eltűntetése, ha a menü bekapcsol
+			
+			// Egér eltüntetése, ha a menü bekapcsol
+			if(GetComponent<pauseMenuScript>().paused)
+			{
 				mouseOn = false;
 				Screen.lockCursor = false;
 			}
@@ -155,13 +159,17 @@ public class playerControlScript : MonoBehaviour {
 				
 			
 			//move		
-			if(cc.isGrounded && !joystick){				// játékos irányítása billenytűzettel
-				forwardSpeed = Input.GetAxis("Vertical") * movementSpeed;
-				horizontalSpeed = Input.GetAxis("Horizontal") * (movementSpeed / horizontalMovementSpeed);			// oldalra lassabban mozog
-			}
-			else if(cc.isGrounded && joystick){			// játékos irányítása joystick-el
-				forwardSpeed = Input.GetAxis("Joystick Vertical") * movementSpeed;
-				horizontalSpeed = Input.GetAxis("Joystick Horizontal") * (movementSpeed / horizontalMovementSpeed);
+			if(cc.isGrounded)				
+			{
+				if (joystick) // játékos irányítása joystick-el
+				{
+					forwardSpeed = Input.GetAxis("Joystick Vertical") * movementSpeed;
+					horizontalSpeed = Input.GetAxis("Joystick Horizontal") * (movementSpeed / horizontalMovementSpeed);			// oldalra lassabban mozog
+				}
+				else { // játékos irányítása billenytűzettel
+					forwardSpeed = Input.GetAxis("Vertical") * movementSpeed;
+					horizontalSpeed = Input.GetAxis("Horizontal") * (movementSpeed / horizontalMovementSpeed);
+				}
 			}
 		
 //Debug.Log(horizontalSpeed + " " + horizontalMovementSpeed);
