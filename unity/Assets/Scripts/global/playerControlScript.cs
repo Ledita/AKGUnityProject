@@ -92,7 +92,7 @@ public class playerControlScript : MonoBehaviour
 					else movementSpeed = Mathf.Clamp(movementSpeed, movementSpeedDefault - 2.0f, movementSpeedDefault + 3.0f);
 				}
 			stamina = Mathf.Clamp(stamina, -5, staminaDefault);
-Debug.Log("Speed: " + movementSpeed + " Stamina: " + stamina);
+//Debug.Log("Speed: " + movementSpeed + " Stamina: " + stamina);
 			
 			//jump
 			if(cc.isGrounded)
@@ -112,13 +112,13 @@ Debug.Log("Speed: " + movementSpeed + " Stamina: " + stamina);
 			}
 			
 			if(!cc.isGrounded){						// ha a levegőben van
-				if(!crouchJumped && Input.GetButtonDown("Crouch")){ // ugrás-gugolás
+				if(!crouchJumped && Input.GetButtonDown("Crouch")){ // ugrás-guggolás
 					verticalVelocity += 2.0f;	// guggolással lök egyet (bug fix)
 					crouchJumped = true;		// csak egyszer lehet ugrani
 				}
 			}
 			else {
-				crouchJumped = false;			// ugrás-gugolás számláló nullázása
+				crouchJumped = false;			// ugrás-guggolás számláló nullázása
 			}
 	
 			
