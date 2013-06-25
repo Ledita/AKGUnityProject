@@ -40,7 +40,9 @@ public class terminalScript : MonoBehaviour {
 		if(OnOff){
 			player.GetComponent<playerControlScript>().canMove = false;
 			player.GetComponent<pauseMenuScript>().canPause = false;
-			playerPosition = new Vector3(terminal.transform.position.x, terminal.transform.position.y, terminal.transform.position.z - 1f);
+			playerPosition = new Vector3(-Mathf.Sin ( terminal.transform.rotation.y ) + terminal.transform.position.x, terminal.transform.position.y, -Mathf.Cos( terminal.transform.rotation.y ) + terminal.transform.position.z);
+//Debug.Log(playerPosition);
+			//playerPosition = new Vector3(terminal.transform.position.x, terminal.transform.position.y, terminal.transform.position.z - 1f);
 			playerPosition = terminal.transform.rotation * playerPosition;
 			player.transform.position = playerPosition;
 			player.transform.rotation = terminal.transform.rotation;

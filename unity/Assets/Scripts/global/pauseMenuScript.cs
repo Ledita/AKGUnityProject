@@ -24,10 +24,12 @@ public class pauseMenuScript : MonoBehaviour
                 if (paused){
                     paused = false;
 					Time.timeScale = 1;
+					//GetComponent<playerControlScript>().canMove = false;
 				}
                 else{
                     paused = true;
 					Time.timeScale = 0;
+					//GetComponent<playerControlScript>().canMove = true;
 				}
 
             }
