@@ -9,7 +9,7 @@ public class playerControlScript : MonoBehaviour
 	float sprintMaxSpeed = 6f;
 	float sprintAcceleration = 12f;
 	float sprintDeceleration = -16f;
-	float verticalVelocity;
+	public float verticalVelocity;
 	float jumpSpeedDefault = 2.5f;
 	float jumpSpeed;
 	float verticalRotation = 0;
@@ -21,19 +21,27 @@ public class playerControlScript : MonoBehaviour
 	float forwardSpeed;
 	float horizontalSpeed;
 	float horizontalMovementSpeed = 2f;
+	float crouchPlayerSize = 0.6f;
+	float footstepTimer = 0;
+	float stepPrev = 0;
+	public float volume = 1f;
 	
 	Vector3 playerSizeDefault = new Vector3 (1.0f, 0.9f, 1.0f);
 	Vector3 playerSize;
-	float crouchPlayerSize = 0.6f;
 	
 	public Vector3 enviromentalMovement = new Vector3 (0, 0, 0);
 	
 	bool mouseOn = true;
 	bool crouchJumped = false;
+	bool landPre = true;
 	
 	public bool canStandUp = true;
 	public bool canMove = true;
 	public bool joystick = false;
+	
+	public AudioClip[] footstepsSound;
+	public AudioClip fallSound1;
+	public AudioClip fallSound2;
 	
 	
 	// Use this for initialization
@@ -180,6 +188,32 @@ public class playerControlScript : MonoBehaviour
 			cc.Move( speed * Time.deltaTime );													// objektum mozgatása
 			
 			enviromentalMovement = new Vector3(0,0,0);											// környezetei nullázása frame-enként (ne gyorsuljon; bug fix)
+			
+			//sounds
+			if(cc.isGrounded){
+				footstepTimer += Mathf.Abs( forwardSpeed );
+				if(Mathf.Abs( forwardSpeed ) < 1){
+					footstepTimer +=  + Mathf.Abs( horizontalSpeed );
+				}
+				
+				if(footstepTimer > 90f)
+				{
+					footstepTimer = 0;
+					AudioSource.PlayClipAtPoint(footstepsSound[ Random.Range(0, footstepsSound.Length) ],  transform.position, 1f);
+				}
+				if(stepPrev == 0 && Mathf.Abs( forwardSpeed ) + Mathf.Abs( horizontalSpeed ) != 0){
+					footstepTimer = 0;
+					AudioSource.PlayClipAtPoint(footstepsSound[ Random.Range(0, footstepsSound.Length) ],  transform.position, volume);
+				}
+				stepPrev = Mathf.Abs( forwardSpeed ) + Mathf.Abs( horizontalSpeed );
+				if(landPre == false){
+					if(verticalVelocity < -8f)
+						AudioSource.PlayClipAtPoint(fallSound1, transform.position, volume - 0.4f);
+					else if(verticalVelocity < -6f)
+						AudioSource.PlayClipAtPoint(fallSound2, transform.position, volume);
+				}
+			}
+			landPre = cc.isGrounded;
 		}
 	}
 }

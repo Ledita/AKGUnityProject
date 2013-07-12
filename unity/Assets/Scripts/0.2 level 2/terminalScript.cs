@@ -19,6 +19,7 @@ public class terminalScript : MonoBehaviour {
 	string textInput;
 	string targetName;
 	GameObject plusButton;
+	bool inside = false;
 	
 	// Use this for initialization
 	void Start () {
@@ -105,7 +106,7 @@ Debug.Log(activeLine);
 	
 	void OnMouseDown()
 	{
-		if(!player.GetComponent<pauseMenuScript>().paused) OnOff = true;
+		if(!player.GetComponent<pauseMenuScript>().paused && inside) OnOff = true;
 	}
 	
 	string TextIn(string text){
@@ -147,5 +148,14 @@ Debug.Log(activeLine);
 			targetObject.GetComponent<globalButtonScrip>().objectDirection = task[1];
 		}
 		return error;
+	}
+	
+	void OnTriggerEnter( Collider collider ){
+		if(collider.gameObject.name == "Player")
+			inside = true;
+	}
+	void OnTriggerExit( Collider collider ){
+		if(collider.gameObject.name == "Player")
+			inside = false;
 	}
 }

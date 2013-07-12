@@ -42,7 +42,9 @@ public GameObject prefabFallingCube;
 			fallen.transform.rotation = Quaternion.Euler(0, -90f, 0);
 			setup();
 			fallen.GetComponent<playerControlScript>().stamina = 3.5f;
+			fallen.GetComponent<playerControlScript>().verticalVelocity = 0f;
 			endTrigger.GetComponent<endFallingCubesScript>().done = false;
+
 		}
 		else Destroy(fallen.gameObject);
 	}

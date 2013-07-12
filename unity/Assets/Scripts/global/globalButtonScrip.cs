@@ -107,36 +107,8 @@ public class globalButtonScrip : MonoBehaviour {
 			targetObject.rigidbody.constraints = RigidbodyConstraints.None;
 			targetObject.rigidbody.isKinematic = false;
 			
-			switch(objectDirection)
-			{
-			case "north" : // x+
-				targetObject.rigidbody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
-				targetObject.rigidbody.AddForce(100f, 0, 0);
-				break;
-			case "south" : // x-
-				targetObject.rigidbody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
-				targetObject.rigidbody.AddForce(-100f, 0, 0);
-				break;
-			case "down" : // y-
-				targetObject.rigidbody.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
-				player.rigidbody.AddForce(0, -100f, 0);
-				targetObject.rigidbody.AddForce(0, -100f, 0);
-				break;
-			case "up" : // y+
-				targetObject.rigidbody.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
-				player.rigidbody.AddForce(0, 100f, 0);
-				targetObject.rigidbody.AddForce(0, 100f, 0);
-				break;
-			case "east" : // z-
-				targetObject.rigidbody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeRotation;
-				targetObject.rigidbody.AddForce(0, 0, -100f);
-				break;
-			case "west" : // z+
-				targetObject.rigidbody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeRotation;
-				targetObject.rigidbody.AddForce(0, 0, 100f);
-				Debug.Log("action");
-				break;
-			}
+			platformScript platScript = targetObject.GetComponent<platformScript>();
+			platScript.movePlatform(objectDirection);
 		}
 		else if(objectName[0] == 'd'){ // door
 			switch(objectDirection)
