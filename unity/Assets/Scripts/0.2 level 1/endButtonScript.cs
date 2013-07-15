@@ -22,7 +22,7 @@ public class endButtonScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(lookIn && insi && !player.GetComponent<pauseMenuScript>().paused && Input.GetButtonDown("Action")){
+		if(lookIn && insi && Input.GetButtonDown("Action")){
 			buttonIn = true;
 			Application.LoadLevel(0);
 		}

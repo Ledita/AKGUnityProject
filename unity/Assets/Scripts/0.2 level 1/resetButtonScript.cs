@@ -32,7 +32,7 @@ public class resetButtonScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(lookIn && insi && !player.GetComponent<pauseMenuScript>().paused && Input.GetButtonDown("Action")){
+		if(lookIn && insi && Input.GetButtonDown("Action")){
 			buttonIn = true;
 			platform01.transform.position = platform01Pos;
 			platform01.rigidbody.isKinematic = true;

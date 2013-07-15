@@ -11,12 +11,16 @@ public class optionsControllerCheckboxScript : MonoBehaviour {
 	
 	// Use this for initialization
 	void Start () {
-		options = GameObject.Find("Options");
-		OnOff = options.GetComponent<OptionsScript>().joystickOnOff;
+		options = GameObject.FindGameObjectWithTag("option");
+		if(options != null)
+			OnOff = options.GetComponent<OptionsScript>().joystickOnOff;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if(options != null)
+			OnOff = options.GetComponent<OptionsScript>().joystickOnOff;
+		
 		if(OnOff){
 			guiTexture.texture = on;
 		}
@@ -27,5 +31,6 @@ public class optionsControllerCheckboxScript : MonoBehaviour {
 	void OnMouseDown(){
 		if(OnOff) OnOff = false;
 		else OnOff = true;
+		options.GetComponent<OptionsScript>().joystickOnOff = OnOff;
 	}
 }

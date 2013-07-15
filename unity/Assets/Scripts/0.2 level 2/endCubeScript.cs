@@ -5,6 +5,7 @@ public class endCubeScript : MonoBehaviour {
 
 	float timer = 0;
 	bool trig = false;
+	public int toLoadLevel;
 	
 	// Use this for initialization
 	void Start () {
@@ -16,7 +17,7 @@ public class endCubeScript : MonoBehaviour {
 		if(trig){
 			timer += Time.deltaTime;
 			if(timer > 0.3f)
-				Application.LoadLevel(0);
+				Application.LoadLevel(toLoadLevel);
 		}
 		
 	}

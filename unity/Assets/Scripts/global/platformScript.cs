@@ -5,10 +5,13 @@ public class platformScript : MonoBehaviour {
 	
 	GameObject player;
 	bool ins = false;
+	bool isPlayer = false;
+	GameObject ObjectOn;
 	Vector3 prevPos;
 	bool collided = false;
 	string currentDirection = null;
 	float playerUp = 0f;
+	float FPS;
 
 
 	// Use this for initialization
@@ -20,42 +23,57 @@ public class platformScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		transform.rotation = Quaternion.Euler(0,0,0);
+		if(Time.deltaTime != 0)
+			FPS = 1/Time.deltaTime;
 		if(ins){
-			player.GetComponent<playerControlScript>().enviromentalMovement = (transform.position - prevPos);
-			//player.GetComponent<playerControlScript>().enviromentalMovement += new Vector3(0, playerUp, 0);
-		}
-		if(collided){
+			if(isPlayer)
+				player.GetComponent<playerControlScript>().enviromentalMovement = (transform.position - prevPos);
+			else{}
+				//ObjectOn.rigidbody.velocity = (transform.position - prevPos) * FPS * 1.042f;
+//Debug.Log(FPS);
+
+			}
+		if(collided && !ins){
 			rigidbody.constraints = RigidbodyConstraints.None;
 			collided = false;
+//Debug.Log("collided");
 		}
 	
 		prevPos = transform.position;		
 	}
 	
 	void OnCollisionEnter(Collision col){
-		if(col.gameObject.name != "hitbox"){
-			rigidbody.isKinematic = true;
-			rigidbody.constraints = RigidbodyConstraints.FreezeAll;
-			collided = true;
-			currentDirection = null;
+		if(col.gameObject.name != "hitbox" && col.gameObject.tag == "MovableObject"){
+			Stop ();
 		}
+		
 	}
 
 	void OnTriggerEnter(Collider obj){
-		if(obj.gameObject.name == "Player") ins = true;
-//Debug.Log("Platform IN");
+		Debug.Log(obj.gameObject.tag);
+		if(obj.gameObject.name == "Player"){ ins = true; isPlayer = true; }
+		else if(obj.gameObject.name != "hitbox"){
+			Stop();
+//Debug.Log("colllide");
+		}
 	}
 	
 	void OnTriggerExit(Collider obj){
-		if(obj.gameObject.name == "Player") ins = false;
+		if(obj.gameObject.name == "Player"){ ins = false; isPlayer = false; }
 		//else if (obj.gameObject.name != gameObject.name) InCollision();
-Debug.Log("Platform OUT");
+//Debug.Log("Platform OUT");
+	}
+	
+	public void Stop(){
+		rigidbody.isKinematic = true;
+		rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+		collided = true;
+		currentDirection = null;
 	}
 	
 	public void movePlatform(string direction){
 		if(direction != currentDirection){
-			
-			
 			switch(direction)
 			{
 			case "north" : // x+

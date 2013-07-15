@@ -20,13 +20,14 @@ public class terminalScript : MonoBehaviour {
 	string targetName;
 	GameObject plusButton;
 	bool inside = false;
+	bool lookIn = false;
 	
 	// Use this for initialization
 	void Start () {
 		terminal = GameObject.Find("TerminalHolder");
 		player = GameObject.Find("Player");
 		MainCamera = GameObject.Find("Main Camera");
-		aim = GameObject.Find("aim");
+		
 		gui = GameObject.Find("TerminalGui");
 		//lines = GameObject.FindGameObjectsWithTag("terminalLine");
 		plusButton = GameObject.Find("plusNormal");
@@ -34,9 +35,11 @@ public class terminalScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(Input.GetKeyDown(KeyCode.Escape)){
+		aim = GameObject.Find("aim(Clone)");
+		if(Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("JoystickPause")){
 			OnOff = false;
 		}
+		
 		
 		if(OnOff){
 			player.GetComponent<playerControlScript>().canMove = false;
@@ -102,6 +105,10 @@ Debug.Log(activeLine);
 			player.GetComponent<pauseMenuScript>().canPause = true;
 		
 		OnOffCheck = OnOff;
+		
+		if(Input.GetButtonDown("Action") && inside && lookIn && !player.GetComponent<pauseMenuScript>().paused){
+			OnOff = true;
+		}
 	}
 	
 	void OnMouseDown()
@@ -143,9 +150,13 @@ Debug.Log(activeLine);
 		targetObject = GameObject.Find(targetName); //finding the button
 		if(targetObject == null)
 			error = true;
-		else {
+		else if(targetObject.name[0] == 'B') {
 			targetObject.GetComponent<globalButtonScrip>().objectName = task[0];
 			targetObject.GetComponent<globalButtonScrip>().objectDirection = task[1];
+		}
+		else if(targetObject.name[0] == 'P'){
+			targetObject.GetComponent<PressurePlateScript>().objectName = task[0];
+			targetObject.GetComponent<PressurePlateScript>().objectDirection = task[1];
 		}
 		return error;
 	}
@@ -157,5 +168,12 @@ Debug.Log(activeLine);
 	void OnTriggerExit( Collider collider ){
 		if(collider.gameObject.name == "Player")
 			inside = false;
+	}
+	void OnMouseEnter(){
+		lookIn = true;
+	}
+	
+	void OnMouseExit(){
+		lookIn = false;	
 	}
 }

@@ -28,12 +28,13 @@ public class globalButtonScrip : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		// joystick push
 		if(lookIn && insi && !player.GetComponent<pauseMenuScript>().paused && Input.GetButtonDown("Action")){
 			buttonIn = true;
 			Action();
 		}
 		
-		
+		// push in direction
 		if(buttonIn){
 			if(!done){
 				switch(dir)
@@ -66,6 +67,7 @@ public class globalButtonScrip : MonoBehaviour {
 				buttonIn = false;
 			}
 		}
+		// reset button Position
 		else {
 			pos = posBasic;
 			transform.position = pos;
@@ -73,6 +75,7 @@ public class globalButtonScrip : MonoBehaviour {
 		}
 	}
 	
+	// in hitbox
 	void OnTriggerEnter(Collider obj){
 //Debug.Log("Button IN");
 		if(obj.name == "Player") insi = true;
@@ -82,7 +85,7 @@ public class globalButtonScrip : MonoBehaviour {
 		if(obj.name == "Player") insi = false;
 	}
 	
-	
+	//click to
 	void OnMouseDown(){
 		if(insi && !player.GetComponent<pauseMenuScript>().paused){
 			buttonIn = true;
@@ -98,6 +101,7 @@ public class globalButtonScrip : MonoBehaviour {
 		lookIn = false;	
 	}
 	
+	//actual doing
 	void Action(){
 		targetObject = GameObject.Find(objectName);
 

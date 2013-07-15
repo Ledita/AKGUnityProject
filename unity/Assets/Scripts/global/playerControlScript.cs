@@ -1,30 +1,39 @@
 using UnityEngine;
-using System.Collections;
+using System.Collections; 
 
 public class playerControlScript : MonoBehaviour
 {	
 	float movementSpeedDefault = 3.6f;
 	float movementSpeed;
+	
 	float crouchSpeedMultiplier = 0.16f;
+	float crouchPlayerSize = 0.6f;
+	
 	float sprintMaxSpeed = 6f;
 	float sprintAcceleration = 12f;
 	float sprintDeceleration = -16f;
+	float staminaDefault = 14.5f;
+	public float stamina = 14.5f;
+	
 	public float verticalVelocity;
 	float jumpSpeedDefault = 2.5f;
 	float jumpSpeed;
 	float verticalRotation = 0;
+	Quaternion jumpRotation;
+	
 	float mouseUpDownRange = 85.0f;
 	public float mouseSpeed = 3f;
 	public float joystickSpeed = 3f;
-	float staminaDefault = 14.5f;
-	public float stamina = 14.5f;
+	
 	float forwardSpeed;
 	float horizontalSpeed;
 	float horizontalMovementSpeed = 2f;
-	float crouchPlayerSize = 0.6f;
+	
 	float footstepTimer = 0;
 	float stepPrev = 0;
 	public float volume = 1f;
+
+	float FPS;
 	
 	Vector3 playerSizeDefault = new Vector3 (1.0f, 0.9f, 1.0f);
 	Vector3 playerSize;
@@ -43,20 +52,43 @@ public class playerControlScript : MonoBehaviour
 	public AudioClip fallSound1;
 	public AudioClip fallSound2;
 	
+	public GameObject aimPrefab;
+	public GameObject inventoryPrefab;
+	
+	public float pushPower = 2.0f;
+	
+	
 	
 	// Use this for initialization
 	void Start ()
 	{
 		playerSize = playerSizeDefault;
+		Instantiate(aimPrefab, new Vector3 (0.5f, 0.5f, 0), Quaternion.Euler(0,0,0));
+		Instantiate(inventoryPrefab, new Vector3 (1.16f, 1.28f, 0), Quaternion.Euler(0,0,0));
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
 		CharacterController cc = GetComponent<CharacterController>();
+		if(Time.deltaTime != 0)
+			FPS = 1/Time.deltaTime;
+		
+		// Egér eltüntetése, ha a menü bekapcsol
+
 		
 		if (canMove)
 		{
+				if(GetComponent<pauseMenuScript>().paused)
+				{
+					mouseOn = false;
+					Screen.lockCursor = false;
+				}
+				else
+				{
+					Screen.lockCursor = true;
+					mouseOn = true;
+				}
 			//Crouch
 			if (Input.GetButton("Crouch"))
 			{
@@ -117,11 +149,12 @@ public class playerControlScript : MonoBehaviour
 			{
 				verticalVelocity = jumpSpeed; // ugrik és fárad
 				stamina -= 0.3f;
+				jumpRotation = transform.rotation;
 			}
 			
 			if(!cc.isGrounded){						// ha a levegőben van
 				if(!crouchJumped && Input.GetButtonDown("Crouch")){ // ugrás-guggolás
-					verticalVelocity += 2.0f;	// guggolással lök egyet (bug fix)
+					verticalVelocity += 1.0f;	// guggolással lök egyet (bug fix)
 					crouchJumped = true;		// csak egyszer lehet ugrani
 				}
 			}
@@ -151,20 +184,7 @@ public class playerControlScript : MonoBehaviour
 				verticalRotation = Mathf.Clamp(verticalRotation, -mouseUpDownRange, mouseUpDownRange);
 				Camera.main.transform.localRotation = Quaternion.Euler(verticalRotation, 0, 0);
 			}
-			
-			
-			// Egér eltüntetése, ha a menü bekapcsol
-			if(GetComponent<pauseMenuScript>().paused)
-			{
-				mouseOn = false;
-				Screen.lockCursor = false;
-			}
-			else
-			{
-				Screen.lockCursor = true;
-				mouseOn = true;
-			}
-				
+		
 			
 			//move		
 			if(cc.isGrounded)				
@@ -184,7 +204,12 @@ public class playerControlScript : MonoBehaviour
 //Debug.Log(forwardSpeed);
 			
 			Vector3 speed = new Vector3(horizontalSpeed, verticalVelocity, forwardSpeed);		// irányok egyesítése vector-ba
-			speed = transform.rotation * speed + enviromentalMovement * 60f;					// fordítással elforgatva a vector, a környezeti sebességgel "meglökve" (platformok)
+			//if(cc.isGrounded)
+				speed = transform.rotation * speed + enviromentalMovement * FPS;					// fordítással elforgatva a vector, a környezeti sebességgel "meglökve" (platformok)
+			/*else
+				speed = jumpRotation * speed + enviromentalMovement * FPS; */
+//Debug.Log(FPS);
+			
 			cc.Move( speed * Time.deltaTime );													// objektum mozgatása
 			
 			enviromentalMovement = new Vector3(0,0,0);											// környezetei nullázása frame-enként (ne gyorsuljon; bug fix)
@@ -199,7 +224,7 @@ public class playerControlScript : MonoBehaviour
 				if(footstepTimer > 90f)
 				{
 					footstepTimer = 0;
-					AudioSource.PlayClipAtPoint(footstepsSound[ Random.Range(0, footstepsSound.Length) ],  transform.position, 1f);
+					AudioSource.PlayClipAtPoint(footstepsSound[ Random.Range(0, footstepsSound.Length) ],  transform.position, volume);
 				}
 				if(stepPrev == 0 && Mathf.Abs( forwardSpeed ) + Mathf.Abs( horizontalSpeed ) != 0){
 					footstepTimer = 0;
@@ -207,13 +232,28 @@ public class playerControlScript : MonoBehaviour
 				}
 				stepPrev = Mathf.Abs( forwardSpeed ) + Mathf.Abs( horizontalSpeed );
 				if(landPre == false){
-					if(verticalVelocity < -8f)
+					if(verticalVelocity < -8f)	//nagy esés
 						AudioSource.PlayClipAtPoint(fallSound1, transform.position, volume - 0.4f);
-					else if(verticalVelocity < -6f)
+					else if(verticalVelocity < -6f) // kis esés
 						AudioSource.PlayClipAtPoint(fallSound2, transform.position, volume);
+					
 				}
 			}
 			landPre = cc.isGrounded;
 		}
 	}
+	
+	
+	// pushing objects
+    void OnControllerColliderHit(ControllerColliderHit hit) {
+        Rigidbody body = hit.collider.attachedRigidbody;
+        if (body == null || body.isKinematic)
+            return;
+        
+        if (hit.moveDirection.y < -0.3F)
+            return;
+        
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+        body.velocity = pushDir * pushPower;
+    }
 }

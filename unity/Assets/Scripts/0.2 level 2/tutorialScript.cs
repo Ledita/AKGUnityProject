@@ -14,7 +14,7 @@ public class tutorialScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(Input.GetKeyDown(KeyCode.Space)){
+		if(Input.GetButtonDown("Jump")){
 			player.GetComponent<playerControlScript>().canMove = true;
 			player.GetComponent<pauseMenuScript>().canPause = true;
 			Application.LoadLevel(6);
