@@ -3,7 +3,7 @@ using System.Collections;
 
 public class terminalScript : MonoBehaviour {
 	
-	bool OnOff = false;
+	public bool OnOff = false;
 	bool OnOffCheck = true;
 	public bool plusLine = false;
 	GameObject terminal;
@@ -12,9 +12,10 @@ public class terminalScript : MonoBehaviour {
 	GameObject aim;
 	GameObject gui;
 	public GameObject[] lines;
-	string[] lineText = {"", "", "", "", "", "", "", ""};
-	bool[] errors = {false, false, false, false, false, false, false, false};
-	int activeLine = 0;
+	public string[] lineText = {"", "", "", "", "", "", "", ""};
+	public bool[] errors = {false, false, false, false, false, false, false, false};
+	public bool portableTerminal = false;
+	public int activeLine = 0;
 	Vector3 playerPosition;
 	string textInput;
 	string targetName;
@@ -42,16 +43,24 @@ public class terminalScript : MonoBehaviour {
 		
 		
 		if(OnOff){
-			player.GetComponent<playerControlScript>().canMove = false;
-			player.GetComponent<pauseMenuScript>().canPause = false;
-			playerPosition = new Vector3(-Mathf.Sin ( terminal.transform.rotation.y ) + terminal.transform.position.x, terminal.transform.position.y, -Mathf.Cos( terminal.transform.rotation.y ) + terminal.transform.position.z);
-//Debug.Log(playerPosition);
-			//playerPosition = new Vector3(terminal.transform.position.x, terminal.transform.position.y, terminal.transform.position.z - 1f);
-			playerPosition = terminal.transform.rotation * playerPosition;
-			player.transform.position = playerPosition;
-			player.transform.rotation = terminal.transform.rotation;
-			MainCamera.transform.localRotation = Quaternion.Euler(33.5f, 0, 0);
-			MainCamera.camera.fieldOfView = 35f;
+			if(!portableTerminal){
+				player.GetComponent<playerControlScript>().canMove = false;
+				player.GetComponent<pauseMenuScript>().canPause = false;
+				playerPosition = new Vector3(-Mathf.Sin ( terminal.transform.rotation.y ) + terminal.transform.position.x, terminal.transform.position.y, -Mathf.Cos( terminal.transform.rotation.y ) + terminal.transform.position.z);
+	//Debug.Log(playerPosition);
+				//playerPosition = new Vector3(terminal.transform.position.x, terminal.transform.position.y, terminal.transform.position.z - 1f);
+				playerPosition = terminal.transform.rotation * playerPosition;
+				player.transform.position = playerPosition;
+				player.transform.rotation = terminal.transform.rotation;
+				MainCamera.transform.localRotation = Quaternion.Euler(33.5f, 0, 0);
+				MainCamera.camera.fieldOfView = 35f;
+			}
+			else{
+				player.GetComponent<playerControlScript>().canMove = false;
+				player.GetComponent<pauseMenuScript>().canPause = false;
+				MainCamera.transform.localRotation = Quaternion.Euler(35f, 0, 0);
+				MainCamera.camera.fieldOfView = 35f;
+			}
 			aim.transform.position = new Vector3(1.5f, 0.5f, 0);
 			Screen.lockCursor = false;
 			gui.transform.position = new Vector3(0,0,0);
@@ -82,9 +91,9 @@ public class terminalScript : MonoBehaviour {
 					lineText[activeLine] = lineText[activeLine].Remove(0, 1);
 				}
 				errors[activeLine] = Process(lineText[activeLine]);
-Debug.Log(activeLine);
+//sDebug.Log(activeLine);
 				activeLine++;
-Debug.Log(activeLine);
+//Debug.Log(activeLine);
 				plusLine = false;
 
 			}
@@ -100,6 +109,7 @@ Debug.Log(activeLine);
 			aim.transform.position = new Vector3(0.5f, 0.5f, 0);
 			Screen.lockCursor = true;
 			gui.transform.position = new Vector3(1f,0,0);
+			portableTerminal = false;
 		}
 		else
 			player.GetComponent<pauseMenuScript>().canPause = true;

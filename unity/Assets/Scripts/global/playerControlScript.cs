@@ -10,7 +10,7 @@ public class playerControlScript : MonoBehaviour
 	float crouchPlayerSize = 0.6f;
 	
 	float sprintMaxSpeed = 6f;
-	float sprintAcceleration = 12f;
+	float sprintAcceleration = 14f;
 	float sprintDeceleration = -16f;
 	float staminaDefault = 14.5f;
 	public float stamina = 14.5f;
@@ -20,14 +20,16 @@ public class playerControlScript : MonoBehaviour
 	float jumpSpeed;
 	float verticalRotation = 0;
 	Quaternion jumpRotation;
+	float wallJumpTimer = 0;
 	
 	float mouseUpDownRange = 85.0f;
 	public float mouseSpeed = 3f;
 	public float joystickSpeed = 3f;
 	
-	float forwardSpeed;
-	float horizontalSpeed;
+	public float forwardSpeed;
+	public float horizontalSpeed;
 	float horizontalMovementSpeed = 2f;
+	public float playerSpeed;
 	
 	float footstepTimer = 0;
 	float stepPrev = 0;
@@ -42,7 +44,9 @@ public class playerControlScript : MonoBehaviour
 	
 	bool mouseOn = true;
 	bool crouchJumped = false;
+	bool isCrouching = false;
 	bool landPre = true;
+	bool wallJump = false;
 	
 	public bool canStandUp = true;
 	public bool canMove = true;
@@ -56,6 +60,7 @@ public class playerControlScript : MonoBehaviour
 	public GameObject inventoryPrefab;
 	
 	public float pushPower = 2.0f;
+	public bool grounded;
 	
 	
 	
@@ -71,6 +76,7 @@ public class playerControlScript : MonoBehaviour
 	void Update ()
 	{
 		CharacterController cc = GetComponent<CharacterController>();
+		grounded = cc.isGrounded;
 		if(Time.deltaTime != 0)
 			FPS = 1/Time.deltaTime;
 		
@@ -79,16 +85,30 @@ public class playerControlScript : MonoBehaviour
 		
 		if (canMove)
 		{
-				if(GetComponent<pauseMenuScript>().paused)
-				{
-					mouseOn = false;
-					Screen.lockCursor = false;
-				}
+			if(GetComponent<pauseMenuScript>().paused)
+			{
+				mouseOn = false;
+				Screen.lockCursor = false;
+			}
+			else
+			{
+				Screen.lockCursor = true;
+				mouseOn = true;
+			}
+			/*
+			if(isCrouching){
+				float rayHeight = 1f;
+				Vector3 rayNDown = new Vector3 ((transform.position.x + (cc.radius - 0.1f)), transform.position.y, transform.position.z); Vector3 rayNUp = new Vector3 ((transform.position.x + (cc.radius - 0.1f)), transform.position.y + rayHeight, transform.position.z);
+				Vector3 raySDown = new Vector3 ((transform.position.x - (cc.radius - 0.1f)), transform.position.y, transform.position.z); Vector3 raySUp = new Vector3 ((transform.position.x - (cc.radius - 0.1f)), transform.position.y + rayHeight, transform.position.z);
+				Vector3 rayEDown = new Vector3 (transform.position.x, transform.position.y, transform.position.z + (cc.radius - 0.1f)); Vector3 rayEUp = new Vector3 (transform.position.x, transform.position.y + rayHeight, transform.position.z + (cc.radius - 0.1f));
+				Vector3 rayWDown = new Vector3 (transform.position.x, transform.position.y, transform.position.z - (cc.radius - 0.1f)); Vector3 rayWUp = new Vector3 (transform.position.x, transform.position.y + rayHeight, transform.position.z - (cc.radius - 0.1f));
+				if(Physics.Raycast(rayEDown, rayEUp, rayHeight) || Physics.Raycast(rayWDown, rayWUp, rayHeight) || Physics.Raycast(raySDown, raySUp, rayHeight) || Physics.Raycast(rayNDown, rayNUp, rayHeight))
+					canStandUp = false;
 				else
-				{
-					Screen.lockCursor = true;
-					mouseOn = true;
-				}
+					canStandUp = true;
+			}
+			*/
+			
 			//Crouch
 			if (Input.GetButton("Crouch"))
 			{
@@ -99,6 +119,7 @@ public class playerControlScript : MonoBehaviour
 				playerSize.y = Mathf.Clamp(playerSize.y, crouchPlayerSize, playerSizeDefault.y);
 				transform.localScale = playerSize;
 				rigidbody.AddForce(0, 0.01f, 0);				//kicsit lök felfelé, hogy ne essen át a padlón (bug fix)
+				isCrouching = true;
 			}
 			else if (playerSize.y < playerSizeDefault.y && canStandUp)							// ha fel kell állni, és fel tud; a canStandUp-hoz egy külső (objektumok alatti) hitbox scriptje fér hozzá
 			{
@@ -107,6 +128,8 @@ public class playerControlScript : MonoBehaviour
 				horizontalMovementSpeed = 2f;					// minden tulajdonság visszaállítása
 				transform.localScale = playerSize;
 			}
+			else
+				isCrouching = false;
 			
 			Camera.main.transform.localPosition = new Vector3(0, 2 * playerSize.y - 0.1f, 0f); 		// kamera beállítása a játékos magasságától függően
 			
@@ -145,10 +168,17 @@ public class playerControlScript : MonoBehaviour
 			
 	
 			
-			if(Input.GetButtonDown("Jump") && cc.isGrounded && !Input.GetButton("Crouch") ) // ha ugorhat
+			if(Input.GetButtonDown("Jump") && (cc.isGrounded || wallJump) && !Input.GetButton("Crouch") ) // ha ugorhat
 			{
 				verticalVelocity = jumpSpeed; // ugrik és fárad
 				stamina -= 0.3f;
+				if(wallJump){
+					stamina -= 0.1f;
+					verticalVelocity += 1f;
+					AudioSource.PlayClipAtPoint(fallSound2, transform.position, volume);
+					wallJump = false;
+					wallJumpTimer = 0;
+				}
 				jumpRotation = transform.rotation;
 			}
 			
@@ -159,10 +189,19 @@ public class playerControlScript : MonoBehaviour
 				}
 			}
 			else {
+				wallJump = false;
 				crouchJumped = false;			// ugrás-guggolás számláló nullázása
 			}
 	
-			
+			//wall jump timer
+			if(wallJump){
+				wallJumpTimer += Time.deltaTime;
+				if(wallJumpTimer > 0.5f){
+					wallJump = false;
+				}
+			}
+			else
+				wallJumpTimer = 0;
 			
 			//rotate camera
 			if(mouseOn && !joystick){						// ha mozoghat a kamera, és nem a joystick mozog
@@ -199,7 +238,10 @@ public class playerControlScript : MonoBehaviour
 					horizontalSpeed = Input.GetAxis("Horizontal") * (movementSpeed / horizontalMovementSpeed);
 				}
 			}
-		
+			if(cc.isGrounded && (cc.isGrounded != landPre || (Input.GetAxis("Joystick Vertical") == 0 && Input.GetAxis("Joystick Horizontal") == 0 && Input.GetAxis("Vertical") == 0 && Input.GetAxis("Horizontal") == 0))){
+				horizontalSpeed = 0;
+				forwardSpeed = 0;
+			}
 //Debug.Log(horizontalSpeed + " " + horizontalMovementSpeed);
 //Debug.Log(forwardSpeed);
 			
@@ -216,11 +258,15 @@ public class playerControlScript : MonoBehaviour
 			
 			//sounds
 			if(cc.isGrounded){
+				playerSpeed = Mathf.Sqrt( forwardSpeed * forwardSpeed + horizontalSpeed * horizontalSpeed );
+				
+				/*
 				footstepTimer += Mathf.Abs( forwardSpeed );
 				if(Mathf.Abs( forwardSpeed ) < 1){
-					footstepTimer +=  + Mathf.Abs( horizontalSpeed );
+					footstepTimer += Mathf.Abs( horizontalSpeed );
 				}
-				
+				*/
+				footstepTimer += playerSpeed;
 				if(footstepTimer > 90f)
 				{
 					footstepTimer = 0;
@@ -241,6 +287,10 @@ public class playerControlScript : MonoBehaviour
 			}
 			landPre = cc.isGrounded;
 		}
+		else{
+			playerSpeed = 0;
+			cc.Move( enviromentalMovement );
+		}
 	}
 	
 	
@@ -255,5 +305,10 @@ public class playerControlScript : MonoBehaviour
         
         Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
         body.velocity = pushDir * pushPower;
-    }
+	}
+    
+	void OnTriggerEnter(Collider col){
+		if(col.gameObject.tag == "wall")
+			wallJump = true;
+	}
 }

@@ -4,14 +4,15 @@ using System.Collections;
 public class platformScript : MonoBehaviour {
 	
 	GameObject player;
-	bool ins = false;
+	public bool ins = false;
 	bool isPlayer = false;
 	GameObject ObjectOn;
 	Vector3 prevPos;
 	bool collided = false;
-	string currentDirection = null;
+	public string currentDirection = null;
 	float playerUp = 0f;
 	float FPS;
+	Vector3 velocity;
 
 
 	// Use this for initialization
@@ -44,16 +45,18 @@ public class platformScript : MonoBehaviour {
 	}
 	
 	void OnCollisionEnter(Collision col){
-		if(col.gameObject.name != "hitbox" && col.gameObject.tag == "MovableObject"){
+		if(col.gameObject.name != "hitbox" && col.gameObject.tag == "MovableObject" && col.gameObject.tag != "Player"){
 			Stop ();
+Debug.Log ("collision");
 		}
 		
 	}
 
 	void OnTriggerEnter(Collider obj){
 		Debug.Log(obj.gameObject.tag);
-		if(obj.gameObject.name == "Player"){ ins = true; isPlayer = true; }
+		if(obj.gameObject.tag == "Player"){ ins = true; isPlayer = true;}
 		else if(obj.gameObject.name != "hitbox"){
+			Debug.Log ("trigger");
 			Stop();
 //Debug.Log("colllide");
 		}
@@ -66,10 +69,13 @@ public class platformScript : MonoBehaviour {
 	}
 	
 	public void Stop(){
-		rigidbody.isKinematic = true;
-		rigidbody.constraints = RigidbodyConstraints.FreezeAll;
-		collided = true;
-		currentDirection = null;
+		if(!isPlayer){
+			rigidbody.isKinematic = true;
+			rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+			collided = true;
+			currentDirection = null;
+Debug.Log ("stop");
+		}
 	}
 	
 	public void movePlatform(string direction){
@@ -116,7 +122,7 @@ public class platformScript : MonoBehaviour {
 				if(currentDirection == "east")
 					rigidbody.AddForce(0, 0, 200f);
 				else
-					rigidbody.AddForce(0, 0, 100f);
+					rigidbody.AddForce(0, 0, 200f);
 				break;
 			}
 			

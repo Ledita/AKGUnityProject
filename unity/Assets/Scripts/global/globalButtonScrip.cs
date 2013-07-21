@@ -12,7 +12,7 @@ public class globalButtonScrip : MonoBehaviour {
 	Vector3 pos;
 	bool done = false;
 	bool lookIn = false;
-	
+
 	public string objectName;
 	public string objectDirection;
 	
@@ -114,16 +114,17 @@ public class globalButtonScrip : MonoBehaviour {
 			platformScript platScript = targetObject.GetComponent<platformScript>();
 			platScript.movePlatform(objectDirection);
 		}
-		else if(objectName[0] == 'd'){ // door
+		else if(objectName[0] == 'D'){ // door
 			switch(objectDirection)
 			{
 			case "open" :
-				//open
+				targetObject.GetComponent<doorScript>().Open();
 				break;
 			case "close" :
-				//close
+				targetObject.GetComponent<doorScript>().Close();
 				break;
 			}
+			
 		}
 	}
 }

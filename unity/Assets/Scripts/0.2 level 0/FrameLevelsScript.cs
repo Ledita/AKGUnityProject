@@ -9,7 +9,7 @@ public class FrameLevelsScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+		guiTexture.pixelInset = new Rect(Screen.width * (600f / 1920f) / -2, Screen.height * (350 / 1080f) / -2, Screen.width * (600f / 1920f), Screen.height * (350 / 1080f));
 	}
 	
 	void OnMouseEnter(){
