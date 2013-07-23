@@ -9,6 +9,9 @@ public class part2resetScript : MonoBehaviour {
 	public GameObject platform;
 	public GameObject portableTerminal;
 	public GameObject middleTrigger;
+	public GameObject button;
+	public GameObject pressureplate;
+	
 	
 	Vector3 platformPos;
 	Vector3 cubePos;
@@ -34,21 +37,26 @@ public class part2resetScript : MonoBehaviour {
 		player.GetComponent<playerControlScript>().verticalVelocity = 1f;
 		player.GetComponent<playerControlScript>().horizontalSpeed = 0;
 		player.GetComponent<playerControlScript>().forwardSpeed = 0;
-		
+Debug.Log("reset");
 		cube.transform.position = cubePos;
 		platform.transform.position = platformPos;
 		platform.GetComponent<platformScript>().ins = false;
 		platform.GetComponent<platformScript>().Stop();
 		platform.GetComponent<platformScript>().currentDirection = null;
 		
-		middleTrigger.GetComponent<levelPart2Script>().Part2();
+		button.GetComponent<globalButtonScrip>().objectName = "";
+		button.GetComponent<globalButtonScrip>().objectDirection = "";
+		
+		pressureplate.GetComponent<PressurePlateScript>().objectName = "";
+		pressureplate.GetComponent<PressurePlateScript>().objectDirection = "";
 		
 		portableTerminal.GetComponent<portableTerminalScript>().inSync = false;
-		terminal.GetComponent<terminalScript>().activeLine = 0;
 		
 		for(int i = 0; i < 8; i++){
 			terminal.GetComponent<terminalScript>().lineText[i] = "";
 			terminal.GetComponent<terminalScript>().errors[i] = false;
 		}
+		terminal.GetComponent<terminalScript>().activeLine = 0;
+		middleTrigger.GetComponent<levelPart2Script>().Part2();
 	}
 }

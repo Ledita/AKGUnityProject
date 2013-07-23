@@ -74,7 +74,7 @@ Debug.Log ("collision");
 			rigidbody.constraints = RigidbodyConstraints.FreezeAll;
 			collided = true;
 			currentDirection = null;
-Debug.Log ("stop");
+//Debug.Log ("stop");
 		}
 	}
 	

@@ -47,6 +47,7 @@ public class playerControlScript : MonoBehaviour
 	bool isCrouching = false;
 	bool landPre = true;
 	bool wallJump = false;
+	bool wallJumped = false;
 	
 	public bool canStandUp = true;
 	public bool canMove = true;
@@ -166,9 +167,9 @@ public class playerControlScript : MonoBehaviour
 			
 			jumpSpeed = jumpSpeedDefault + movementSpeed * (movementSpeed - 1.2f * Mathf.Sqrt(movementSpeed)) / 16; // ugrás sebessége (magassága), a játékos sebességéből levezetve (bonyolult, de így reális)
 			
-	
+
 			
-			if(Input.GetButtonDown("Jump") && (cc.isGrounded || wallJump) && !Input.GetButton("Crouch") ) // ha ugorhat
+			if(Input.GetButtonDown("Jump") && (cc.isGrounded || (wallJump && !wallJumped)) && !Input.GetButton("Crouch") ) // ha ugorhat
 			{
 				verticalVelocity = jumpSpeed; // ugrik és fárad
 				stamina -= 0.3f;
@@ -178,6 +179,7 @@ public class playerControlScript : MonoBehaviour
 					AudioSource.PlayClipAtPoint(fallSound2, transform.position, volume);
 					wallJump = false;
 					wallJumpTimer = 0;
+					wallJumped = true;
 				}
 				jumpRotation = transform.rotation;
 			}
@@ -188,8 +190,9 @@ public class playerControlScript : MonoBehaviour
 					crouchJumped = true;		// csak egyszer lehet ugrani
 				}
 			}
-			else {
+			else if (cc.isGrounded) {
 				wallJump = false;
+				wallJumped = false;
 				crouchJumped = false;			// ugrás-guggolás számláló nullázása
 			}
 	

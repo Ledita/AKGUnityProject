@@ -33,7 +33,9 @@ public class pickUpScript : MonoBehaviour {
 		if(pickedUp){
 			
 			Vector3 pos = mainCamera.transform.position + mainCamera.transform.forward * 1.2f;
+			pos.y = Mathf.Clamp(pos.y, 0.4f, 2.2f);
 			pos.y -= 0.5f;
+Debug.Log(pos);
 			rigidbody.velocity = (pos - transform.position) * FPS;//transform.position - pos;
 			transform.rotation = player.transform.rotation;
 			//rigidbody.isKinematic = true;
@@ -58,7 +60,7 @@ public class pickUpScript : MonoBehaviour {
 	}
 	void OnMouseDown(){
 		if(Vector3.Distance(transform.position, player.transform.position) < pickUpDistance){
-			if(!inventory.GetComponent<inventoryScript>().holdingObject && !pickedUp){
+			if(!inventory.GetComponent<inventoryScript>().holdingObject && !pickedUp && inventory.GetComponent<inventoryScript>().ringPos == 0){
 				pickedUp = !pickedUp;
 				inventory.GetComponent<inventoryScript>().holdingObject = true;
 			}

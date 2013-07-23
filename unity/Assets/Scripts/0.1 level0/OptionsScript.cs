@@ -19,8 +19,13 @@ public class OptionsScript : MonoBehaviour {
 	
 	// Use this for initialization
 	void Start () {
-		GameObject[] other = GameObject.FindGameObjectsWithTag("option");
-		if(other.Length > 1) Destroy(gameObject);
+		GameObject started = GameObject.Find("Started");
+		if(started != null){
+			Destroy(gameObject);
+		}
+		else{
+			Application.LoadLevel("InDev 0.3 level-1");
+		}
 		
 		DontDestroyOnLoad(gameObject);
 		

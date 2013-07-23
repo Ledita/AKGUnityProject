@@ -20,6 +20,7 @@ public class globalButtonScrip : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+Debug.Log(objectName);
 		//platform01 = GameObject.Find(platformName01);
 		player = GameObject.Find("Player");
 		posBasic = transform.position;
@@ -112,6 +113,7 @@ public class globalButtonScrip : MonoBehaviour {
 			targetObject.rigidbody.isKinematic = false;
 			
 			platformScript platScript = targetObject.GetComponent<platformScript>();
+Debug.Log (objectDirection);
 			platScript.movePlatform(objectDirection);
 		}
 		else if(objectName[0] == 'D'){ // door

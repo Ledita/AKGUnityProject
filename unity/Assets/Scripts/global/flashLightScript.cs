@@ -46,13 +46,13 @@ public class flashLightScript : MonoBehaviour {
 			lampShiftSpeed = (playerSpeed + (playerSpeed * Random.value)) * lampShiftDirection * 5f / 90f;
 			lampShift += lampShiftSpeed;// * Time.deltaTime;
 //Debug.Log(lampShift);
-			if(lampShift > 3f){
+			if(lampShift > 2.5f){
 				lampShiftDirection = -1f;
 			}
-			else if(lampShift < -3f){
+			else if(lampShift < -2.5f){
 				lampShiftDirection = 1f;
 			}
-			lampShift = Mathf.Clamp(lampShift, -3f, 3f);
+			lampShift = Mathf.Clamp(lampShift, -2.5f, 2.5f);
 			transform.rotation = Quaternion.Euler(0, lampShift, 0) * Camera.mainCamera.transform.rotation;
 			
 			dPadPre = Input.GetAxis("Joystick Dpad Vertical");
